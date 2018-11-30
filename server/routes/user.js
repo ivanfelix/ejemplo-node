@@ -1,17 +1,40 @@
 const express = require('express');
-const app = express();
 const Usuario = require('../models/user');
 const bcrypt = require('bcrypt');
+const { verificaToken } = require('../middlewares/autenticacion');
+
+const app = express();
 
 app.get('/', function(req, res) {
     res.send('Hello world');
 })
 
-app.get('/usuario', function(req, res) {
-    res.send('Hello usuario');
+app.get('/usuario', verificaToken, function(req, res) {
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+    Usuario.find({}, 'nombre email img role estado google')
+        .skip(desde)
+        .limit(limite)
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                })
+            }
+            Usuario.count({}, (err, conteo) => {
+                res.json({
+                    ok: true,
+                    usuarios,
+                    conteo
+                })
+            })
+        })
 })
 
-app.post('/usuario', (req, res) => {
+app.post('/usuario', verificaToken, (req, res) => {
     let body = req.body;
     let usuario = new Usuario({
         nombre: body.nombre,
@@ -33,4 +56,23 @@ app.post('/usuario', (req, res) => {
     })
 })
 
+app.delete('/usuario/:id', verificaToken, (req, res) => {
+    var id = req.params.id;
+    //Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
+    var estado = {
+        estado: false
+    }
+    Usuario.findByIdAndUpdate(id, estado, { new: true }, (err, usuarioBorrado) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            })
+        }
+        res.json({
+            ok: true,
+            usuarioBorrado
+        })
+    })
+})
 module.exports = app;

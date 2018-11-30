@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 app.use(require('./routes/user'));
+app.use(require('./routes/login'));
 
 
 mongoose.connect('mongodb://ivanfelix:Marciano88@ds121982.mlab.com:21982/nodeprueba', (err, res) => {
