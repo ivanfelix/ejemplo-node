@@ -1,4 +1,5 @@
 var jwt = require('jsonwebtoken');
+
 let verificaToken = (req, res, next) => {
     let token = req.get('token');
     jwt.verify(token, 'secret', (err, decoded) => {
@@ -10,14 +11,25 @@ let verificaToken = (req, res, next) => {
                 }
             })
         }
-        req.usuario = decoded.usuario;
+        req.usuario = decoded.data;
+        //console.log(req.usuario);
         next();
     })
-    res.json({
-        token
-    })
+}
+let verificaRole = (req, res, next) => {
+    let usuario = req.usuario;
+    if (usuario.role != 'ADMIN_ROLE') {
+        return res.status(401).json({
+            ok: false,
+            err: {
+                message: 'Rol no válido'
+            }
+        })
+    }
+    next();
 }
 
 module.exports = {
-    verificaToken
+    verificaToken,
+    verificaRole
 }

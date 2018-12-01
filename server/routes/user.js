@@ -1,7 +1,7 @@
 const express = require('express');
 const Usuario = require('../models/user');
 const bcrypt = require('bcrypt');
-const { verificaToken } = require('../middlewares/autenticacion');
+const { verificaToken, verificaRole } = require('../middlewares/autenticacion');
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.get('/usuario', verificaToken, function(req, res) {
         })
 })
 
-app.post('/usuario', verificaToken, (req, res) => {
+app.post('/usuario', [verificaToken, verificaRole], (req, res) => {
     let body = req.body;
     let usuario = new Usuario({
         nombre: body.nombre,
@@ -56,7 +56,7 @@ app.post('/usuario', verificaToken, (req, res) => {
     })
 })
 
-app.delete('/usuario/:id', verificaToken, (req, res) => {
+app.delete('/usuario/:id', [verificaToken, verificaRole], (req, res) => {
     var id = req.params.id;
     //Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
     var estado = {
