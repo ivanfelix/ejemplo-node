@@ -12,7 +12,6 @@ let verificaToken = (req, res, next) => {
             })
         }
         req.usuario = decoded.data;
-        //console.log(req.usuario);
         next();
     })
 }
